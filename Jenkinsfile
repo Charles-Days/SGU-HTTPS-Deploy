@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        PATH = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    }
+
     stages {
         stage('Stop Services') {
             steps {
@@ -8,7 +12,7 @@ pipeline {
                     echo '🛑 Deteniendo servicios anteriores...'
                     sh '''
                         cd $WORKSPACE
-                        docker compose down || true
+                        /usr/local/bin/docker compose down || true
                     '''
                 }
             }
@@ -19,8 +23,8 @@ pipeline {
                 script {
                     echo '🗑️ Eliminando imágenes antiguas...'
                     sh '''
-                        docker rmi client:1.0-sgu -f || true
-                        docker rmi server:1.0-sgu -f || true
+                        /usr/local/bin/docker rmi client:1.0-sgu -f || true
+                        /usr/local/bin/docker rmi server:1.0-sgu -f || true
                     '''
                 }
             }
@@ -44,7 +48,7 @@ pipeline {
                     echo '🏗️ Construyendo imágenes y desplegando servicios...'
                     sh '''
                         cd $WORKSPACE
-                        docker compose up -d --build
+                        /usr/local/bin/docker compose up -d --build
                     '''
                 }
             }
@@ -56,7 +60,7 @@ pipeline {
                     echo '🏥 Verificando estado de los servicios...'
                     sh '''
                         sleep 10
-                        docker ps
+                        /usr/local/bin/docker ps
 
                         echo "Esperando a que el backend esté listo..."
                         for i in {1..30}; do
@@ -81,11 +85,11 @@ pipeline {
         }
         failure {
             echo '❌ Pipeline falló. Revisa los logs para más detalles.'
-            sh 'docker compose logs --tail=50'
+            sh '/usr/local/bin/docker compose logs --tail=50 || true'
         }
         always {
             echo '📊 Estado final de los contenedores:'
-            sh 'docker ps -a | grep sgu || true'
+            sh '/usr/local/bin/docker ps -a | grep sgu || true'
         }
     }
 }
