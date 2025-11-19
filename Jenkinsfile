@@ -6,14 +6,20 @@ pipeline {
     }
 
     stages {
+        stage('Checkout SCM') {
+            steps {
+                script {
+                    echo '📥 Código obtenido del repositorio'
+                    sh 'pwd && ls -la'
+                }
+            }
+        }
+
         stage('Stop Services') {
             steps {
                 script {
                     echo '🛑 Deteniendo servicios anteriores...'
-                    sh '''
-                        cd $WORKSPACE
-                        /usr/local/bin/docker compose down || true
-                    '''
+                    sh '/usr/local/bin/docker compose down || true'
                 }
             }
         }
@@ -30,26 +36,11 @@ pipeline {
             }
         }
 
-        stage('Pull from SCM') {
-            steps {
-                script {
-                    echo '📥 Obteniendo últimos cambios del repositorio...'
-                    sh '''
-                        cd $WORKSPACE
-                        git pull origin main || true
-                    '''
-                }
-            }
-        }
-
         stage('Build and Deploy') {
             steps {
                 script {
                     echo '🏗️ Construyendo imágenes y desplegando servicios...'
-                    sh '''
-                        cd $WORKSPACE
-                        /usr/local/bin/docker compose up -d --build
-                    '''
+                    sh '/usr/local/bin/docker compose up -d --build'
                 }
             }
         }
@@ -59,7 +50,7 @@ pipeline {
                 script {
                     echo '🏥 Verificando estado de los servicios...'
                     sh '''
-                        sleep 10
+                        sleep 15
                         /usr/local/bin/docker ps
 
                         echo "Esperando a que el backend HTTPS esté listo..."
