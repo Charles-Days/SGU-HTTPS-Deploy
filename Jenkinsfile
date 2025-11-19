@@ -23,8 +23,8 @@ pipeline {
                 script {
                     echo '🗑️ Eliminando imágenes antiguas...'
                     sh '''
-                        /usr/local/bin/docker rmi client:1.0-sgu -f || true
-                        /usr/local/bin/docker rmi server:1.0-sgu -f || true
+                        /usr/local/bin/docker rmi client:1.0-sgu-https -f || true
+                        /usr/local/bin/docker rmi server:1.0-sgu-https -f || true
                     '''
                 }
             }
@@ -62,10 +62,10 @@ pipeline {
                         sleep 10
                         /usr/local/bin/docker ps
 
-                        echo "Esperando a que el backend esté listo..."
+                        echo "Esperando a que el backend HTTPS esté listo..."
                         for i in {1..30}; do
-                            if curl -s http://localhost:8081/sgu-api/users > /dev/null; then
-                                echo "✅ Backend está respondiendo"
+                            if curl -k -s https://localhost:8444/sgu-api/users > /dev/null; then
+                                echo "✅ Backend HTTPS está respondiendo"
                                 break
                             fi
                             echo "Intento $i/30..."
@@ -80,8 +80,9 @@ pipeline {
     post {
         success {
             echo '✅ ¡Pipeline ejecutado exitosamente!'
-            echo '🌐 Aplicación disponible en http://localhost:3000'
-            echo '📡 API disponible en http://localhost:8081/sgu-api'
+            echo '🌐 Aplicación disponible en https://localhost:3001'
+            echo '📡 API disponible en https://localhost:8444/sgu-api'
+            echo '🔒 HTTPS configurado correctamente'
         }
         failure {
             echo '❌ Pipeline falló. Revisa los logs para más detalles.'

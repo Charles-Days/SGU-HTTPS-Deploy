@@ -1,8 +1,9 @@
 const API_HOST = import.meta.env.VITE_API_HOST
 const API_PORT = import.meta.env.VITE_API_PORT
 const API_BASE = import.meta.env.VITE_API_BASE
+const API_PROTOCOL = import.meta.env.VITE_API_PROTOCOL || 'https'
 
-const API_URL = `http://${API_HOST}:${API_PORT}${API_BASE}`
+const API_URL = `${API_PROTOCOL}://${API_HOST}:${API_PORT}${API_BASE}`
 
 export const getUsers = async () => {
   try {

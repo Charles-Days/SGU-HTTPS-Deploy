@@ -1,18 +1,18 @@
 services:
   database:
     image: mysql:8
-    container_name: sgu-database
+    container_name: sgu-database-https
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: sgu
       MYSQL_USER: sgu_user
       MYSQL_PASSWORD: sgu_password
     ports:
-      - "3307:3306"
+      - "3308:3306"
     volumes:
-      - sgu-volume:/var/lib/mysql
+      - sgu-volume-https:/var/lib/mysql
     networks:
-      - sgu-net
+      - sgu-net-https
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -21,44 +21,45 @@ services:
 
   frontend:
     build:
-      context: ./client
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile.frontend
       args:
         VITE_API_HOST: localhost
-        VITE_API_PORT: 8081
+        VITE_API_PORT: 8444
         VITE_API_BASE: /sgu-api
-    image: client:1.0-sgu
-    container_name: sgu-frontend
+    image: client:1.0-sgu-https
+    container_name: sgu-frontend-https
     ports:
-      - "3000:80"
+      - "3001:443"
+      - "3002:80"
     networks:
-      - sgu-net
+      - sgu-net-https
     depends_on:
       database:
         condition: service_healthy
 
   backend:
     build:
-      context: ./server
-      dockerfile: Dockerfile
-    image: server:1.0-sgu
-    container_name: sgu-backend
+      context: .
+      dockerfile: Dockerfile.backend
+    image: server:1.0-sgu-https
+    container_name: sgu-backend-https
     environment:
       DB_URL: jdbc:mysql://database:3306/sgu
       DB_USER: sgu_user
       DB_PASS: sgu_password
     ports:
-      - "8081:8080"
+      - "8444:8443"
     networks:
-      - sgu-net
+      - sgu-net-https
     depends_on:
       database:
         condition: service_healthy
 
 networks:
-  sgu-net:
+  sgu-net-https:
     driver: bridge
 
 volumes:
-  sgu-volume:
+  sgu-volume-https:
     external: false
